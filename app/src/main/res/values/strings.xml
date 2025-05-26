@@ -1,3 +1,33 @@
 <resources>
     <string name="app_name">LostFound</string>
+    <string name="channel_name_login">Login Notifications</string>
+    <string name="channel_description_login">Notifications related to login attempts.</string>
+    <string name="login_failed_title">Login Failed</string>
+    <string name="invalid_credentials_message">Invalid username or password. Please try again.
+    </string>
+    <string name="notification_permission_needed_login">Login error alerts require notification
+        permission.
+    </string>
+    <string name="notification_permission_denied_message">Notification permission was denied. You
+        might miss important alerts.
+    </string>
+    <string name="notification_permission_granted_message">Notification permission granted.</string>
+
+    <!-- General Notification Channel -->
+    <string name="default_channel_name">General Notifications</string>
+    <string name="default_channel_description">Default channel for app notifications</string>
+
+    <!-- Example for another type of notification -->
+    <string name="new_item_found_title">New Item Found!</string>
+    <string name="new_item_found_message">A new item was reported: %1$s</string>
+
+
+    <!-- <string name="default_channel_name">App Notifications</string> -->
+
+    <!-- <string name="default_channel_description">General notifications for the app</string> -->
+
+
+    <!-- <string name="default_channel_name">App Notifications</string> -->
+
+    <!-- <string name="default_channel_description">General notifications for the app</string> -->
 </resources>

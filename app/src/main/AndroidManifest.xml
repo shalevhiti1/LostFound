@@ -1,6 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:tools="http://schemas.android.com/tools">
+    xmlns:tools="http://schemas.android.com/tools"
+    package="com.example.lostfound">
+
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="com.android.alarm.permission.SET_ALARM" />
 
     <application
         android:allowBackup="true"
@@ -12,41 +17,46 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.LostFound"
         tools:targetApi="31">
+        <receiver
+            android:enabled="true"
+            android:exported="false"
+            android:name="com.example.lostfound.AlarmReceiver" />
+
         <activity
-            android:name=".LoginActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:name="com.example.lostfound.LoginActivity" />
         <activity
-            android:name=".MainActivity"
-            android:exported="true">
+            android:exported="true"
+            android:name="com.example.lostfound.MainActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
         <activity
-            android:name=".RegistrationActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:name="com.example.lostfound.RegistrationActivity" />
         <activity
-            android:name=".UserDetailsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:name="com.example.lostfound.UserDetailsActivity" />
         <activity
-            android:name=".UserActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:name="com.example.lostfound.UserActivity" />
         <activity
-            android:name=".AdminActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:name="com.example.lostfound.AdminActivity" />
         <activity
-            android:name=".AllCasesActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:name="com.example.lostfound.AllCasesActivity" />
         <activity
-            android:name=".MyCasesActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:name="com.example.lostfound.MyCasesActivity" />
         <activity
-            android:name=".NewCaseActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:name="com.example.lostfound.NewCaseActivity" />
         <activity
-            android:name=".CaseDetailsActivity"
-            android:exported="false" />
+            android:exported="false"
+            android:name="com.example.lostfound.CaseDetailsActivity" />
     </application>
 
 
