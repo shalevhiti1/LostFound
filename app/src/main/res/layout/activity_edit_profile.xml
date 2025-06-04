@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".EditProfileActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="ערוך פרטי משתמש"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="24dp"/>
+
+    <EditText
+        android:id="@+id/editUsername"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="שם משתמש"
+        android:inputType="textPersonName"
+        android:focusable="false"
+        android:clickable="false"
+        android:longClickable="false"
+        android:drawablePadding="8dp"
+       android:padding="12dp"
+        android:layout_marginBottom="12dp"/>
+
+    <EditText
+        android:id="@+id/editFullName"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="שם מלא"
+        android:inputType="textPersonName"
+        android:drawablePadding="8dp"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"/>
+
+    <EditText
+        android:id="@+id/editIdCard"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="תעודת זהות"
+        android:inputType="number"
+        android:focusable="false"
+        android:clickable="false"
+        android:longClickable="false"
+        android:drawablePadding="8dp"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"/>
+
+    <EditText
+        android:id="@+id/editPhoneNumber"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="מספר טלפון"
+        android:inputType="phone"
+        android:drawablePadding="8dp"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"/>
+
+    <EditText
+        android:id="@+id/editEmail"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="אימייל"
+        android:inputType="textEmailAddress"
+        android:drawablePadding="8dp"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"/>
+
+    <EditText
+        android:id="@+id/editCity"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="עיר"
+        android:inputType="textPersonName"
+        android:drawablePadding="8dp"
+        android:padding="12dp"
+        android:layout_marginBottom="24dp"/>
+
+    <Button
+        android:id="@+id/saveProfileButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="שמור שינויים"
+        android:textColor="@android:color/white"
+        android:padding="12dp"/>
+
+</LinearLayout>

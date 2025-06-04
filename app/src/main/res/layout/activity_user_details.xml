@@ -1,46 +1,97 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:padding="16dp">
+    android:padding="24dp"
+    android:gravity="center_horizontal"
+    android:background="#F0F2F5"
+    tools:context=".UserDetailsActivity">
 
+    <!-- Screen Title -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="User Details"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="#2C3E50"
+        android:layout_marginBottom="30dp"
+        android:layout_marginTop="16dp"/>
+
+    <!-- Full Name EditText -->
     <EditText
         android:id="@+id/fullNameEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Full Name" />
+        android:hint="Full Name"
+        android:inputType="textPersonName"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"
+        android:drawablePadding="8dp"/>
 
+    <!-- ID Card EditText -->
     <EditText
         android:id="@+id/idCardEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="ID Card" />
+        android:hint="ID Card"
+        android:inputType="number"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"
+        android:drawablePadding="8dp"/>
 
+    <!-- Phone Number EditText -->
     <EditText
         android:id="@+id/phoneNumberEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Phone Number"
-        android:inputType="phone"/>
+        android:inputType="phone"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"
+        android:drawablePadding="8dp"/>
 
+    <!-- Email EditText -->
     <EditText
         android:id="@+id/emailEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:hint="Email"
-        android:inputType="textEmailAddress"/>
+        android:inputType="textEmailAddress"
+        android:padding="12dp"
+        android:layout_marginBottom="12dp"
+        android:drawablePadding="8dp"/>
 
+    <!-- City EditText -->
     <EditText
         android:id="@+id/cityEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="City" />
+        android:hint="City"
+        android:inputType="text"
+        android:padding="12dp"
+        android:layout_marginBottom="24dp"
+        android:drawablePadding="8dp"/>
 
-    <Button
-        android:id="@+id/saveButton"
+    <!-- CardView for Save Button -->
+    <androidx.cardview.widget.CardView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Save" />
+        app:cardCornerRadius="12dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="#FFFFFF">
+
+        <Button
+            android:id="@+id/saveButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Save Details"
+            android:textColor="@android:color/white"
+            android:padding="16dp"
+            android:minHeight="60dp"/>
+    </androidx.cardview.widget.CardView>
 
 </LinearLayout>

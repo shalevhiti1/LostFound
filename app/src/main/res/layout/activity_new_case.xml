@@ -1,81 +1,159 @@
 <?xml version="1.0" encoding="utf-8"?>
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent"
+    android:background="#F0F2F5"
+    tools:context=".NewCaseActivity">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:padding="24dp"
+        android:gravity="center_horizontal">
 
+        <!-- Screen Title -->
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Open New Case"
+            android:textSize="30sp"
+            android:textStyle="bold"
+            android:textColor="#2C3E50"
+            android:layout_marginBottom="30dp"
+            android:layout_marginTop="16dp"/>
+
+        <!-- Item Type EditText -->
         <EditText
             android:id="@+id/itemTypeEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Item Type" />
+            android:hint="Item Type"
+            android:inputType="text"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:drawablePadding="8dp"/>
 
+        <!-- Color EditText -->
         <EditText
             android:id="@+id/colorEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Color" />
+            android:hint="Color"
+            android:inputType="text"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:drawablePadding="8dp"/>
 
+        <!-- Brand EditText -->
         <EditText
             android:id="@+id/brandEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Brand" />
+            android:hint="Brand"
+            android:inputType="text"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:drawablePadding="8dp"/>
 
+        <!-- Owner's Name EditText -->
         <EditText
             android:id="@+id/ownerNameEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Owner's Name" />
+            android:hint="Owner's Name"
+            android:inputType="textPersonName"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:drawablePadding="8dp"/>
 
+        <!-- Loss Description EditText -->
         <EditText
             android:id="@+id/lossDescriptionEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Loss Description"
-            android:inputType="textMultiLine" />
+            android:inputType="textMultiLine"
+            android:lines="4"
+            android:gravity="top"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:drawablePadding="8dp"/>
 
+        <!-- Trip Date EditText -->
         <EditText
             android:id="@+id/tripDateEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:hint="Trip Date"
-            android:focusable="false"/>
+            android:focusable="false"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:drawablePadding="8dp"/>
 
+        <!-- Trip Time EditText -->
         <EditText
             android:id="@+id/tripTimeEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Trip Time" />
+            android:hint="Trip Time"
+            android:inputType="time"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:drawablePadding="8dp"/>
 
+        <!-- Origin EditText -->
         <EditText
             android:id="@+id/originEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Origin" />
+            android:hint="Origin"
+            android:inputType="text"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+            android:drawablePadding="8dp"/>
 
+        <!-- Destination EditText -->
         <EditText
             android:id="@+id/destinationEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Destination" />
+            android:hint="Destination"
+            android:inputType="text"
+            android:padding="12dp"
+            android:layout_marginBottom="12dp"
+           android:drawablePadding="8dp"/>
 
+        <!-- Line Number EditText -->
         <EditText
             android:id="@+id/lineNumberEditText"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:hint="Line Number" />
+            android:hint="Line Number"
+            android:inputType="text"
+            android:padding="12dp"
+            android:layout_marginBottom="24dp"
+            android:drawablePadding="8dp"/>
 
-        <Button
-            android:id="@+id/saveCaseButton"
+        <!-- CardView for Save Case Button -->
+        <androidx.cardview.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Save Case" />
+            app:cardCornerRadius="12dp"
+            app:cardElevation="8dp"
+            app:cardBackgroundColor="#FFFFFF">
+
+            <Button
+                android:id="@+id/saveCaseButton"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Save Case"
+                android:textColor="@android:color/white"
+                android:padding="16dp"
+                android:minHeight="60dp"/>
+        </androidx.cardview.widget.CardView>
 
     </LinearLayout>
 </ScrollView>

@@ -1,29 +1,79 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="16dp">
+    android:padding="24dp"
+    android:background="#F0F2F5"
+    tools:context=".UserActivity">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Welcome, user!"
-        android:textSize="24sp"
-        android:layout_marginBottom="32dp"/>
+        android:text="Welcome, User!"
+        android:textSize="30sp"
+        android:textStyle="bold"
+        android:textColor="#2C3E50"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="40dp"/>
 
-    <Button
-        android:id="@+id/openNewCaseButton"
-        android:layout_width="wrap_content"
+    <!-- CardView for Edit Profile Button -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Open New Case"
-        android:layout_marginBottom="16dp"/>
-    <Button
-        android:id="@+id/viewMyCasesButton"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="View My Cases" />
+        android:layout_marginBottom="20dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="#FFFFFF">
 
+        <Button
+            android:id="@+id/editProfileButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Edit Profile"
+            android:textColor="@android:color/white"
+            android:padding="16dp"
+            android:minHeight="60dp"/>
+    </androidx.cardview.widget.CardView>
+
+    <!-- CardView for Open New Case Button -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="20dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="#FFFFFF">
+
+        <Button
+            android:id="@+id/openNewCaseButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Open New Case"
+            android:textColor="@android:color/white"
+            android:padding="16dp"
+            android:minHeight="60dp"/>
+    </androidx.cardview.widget.CardView>
+
+    <!-- CardView for View My Cases Button -->
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="8dp"
+        app:cardBackgroundColor="#FFFFFF">
+
+        <Button
+            android:id="@+id/viewMyCasesButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="View My Cases"
+            android:textColor="@android:color/white"
+            android:padding="16dp"
+            android:minHeight="60dp"/>
+    </androidx.cardview.widget.CardView>
 
 </LinearLayout>

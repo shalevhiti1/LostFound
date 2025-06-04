@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp"
+    tools:context=".AdminEditCaseActivity">
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Edit Case Details (Admin)"
+        android:textSize="24sp"
+        android:textStyle="bold"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginBottom="24dp"/>
+
+    <!-- Display Request ID (non-editable) -->
+    <TextView
+        android:id="@+id/adminEditCaseIdTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Case ID: "
+        android:textSize="18sp"
+        android:textStyle="bold"
+        android:layout_marginBottom="12dp"/>
+
+    <!-- Display other read-only details of the request (optional, but good for context) -->
+    <TextView
+        android:id="@+id/adminEditItemTypeTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Item Type: "
+        android:textSize="16sp"
+        android:layout_marginBottom="8dp"/>
+
+    <TextView
+        android:id="@+id/adminEditReporterTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Reporter: "
+        android:textSize="16sp"
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Status Spinner (Dropdown) -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Status:"
+        android:textSize="16sp"
+        android:layout_marginBottom="4dp"/>
+    <Spinner
+        android:id="@+id/statusSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="16dp"
+        android:padding="8dp" />
+
+    <!-- System Comments EditText -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="System Comments:"
+        android:textSize="16sp"
+        android:layout_marginBottom="4dp"/>
+    <EditText
+        android:id="@+id/systemCommentsEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter system comments for the user"
+        android:inputType="textMultiLine"
+        android:lines="4"
+        android:gravity="top"
+        android:padding="12dp"
+        android:layout_marginBottom="24dp"/>
+
+    <Button
+        android:id="@+id/saveAdminChangesButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Save Changes"
+        android:textColor="@android:color/white"
+        android:padding="12dp"/>
+
+</LinearLayout>

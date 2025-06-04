@@ -5,45 +5,28 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:padding="16dp"
-    tools:context=".AllCasesActivity">
+    tools:context=".UserManagementActivity">
 
     <TextView
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="All Cases"
+        android:text="Manage Users"
         android:textSize="24sp"
         android:textStyle="bold"
         android:layout_gravity="center_horizontal"
-        android:layout_marginBottom="16dp"/>
-
-    <!-- NEW: Search View -->
-    <SearchView
-        android:id="@+id/caseSearchView"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:queryHint="Search by item type, owner, or description"
-        android:iconifiedByDefault="false"
-        android:layout_marginBottom="8dp" />
-
-    <!-- NEW: Status Filter Spinner -->
-    <Spinner
-        android:id="@+id/statusFilterSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_marginBottom="16dp"
-        android:padding="8dp"/>
+        android:layout_marginBottom="24dp"/>
 
     <TextView
-        android:id="@+id/noCasesTextView"
+        android:id="@+id/noUsersTextView"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="No cases to display."
+        android:text="No registered users to display."
         android:gravity="center"
         android:textSize="18sp"
         android:visibility="gone" /> <!-- Initially hidden -->
 
     <ListView
-        android:id="@+id/allCasesListView"
+        android:id="@+id/usersListView"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

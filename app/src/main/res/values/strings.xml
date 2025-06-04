@@ -20,7 +20,15 @@
     <!-- Example for another type of notification -->
     <string name="new_item_found_title">New Item Found!</string>
     <string name="new_item_found_message">A new item was reported: %1$s</string>
-
+    <string-array name="case_statuses">
+        <item>In Progress</item>
+        <item>Case Closed</item>
+    </string-array>
+    <string-array name="all_case_statuses_filter">
+        <item>All Cases</item>
+        <item>In Progress</item>
+        <item>Case Closed</item>
+    </string-array>
 
     <!-- <string name="default_channel_name">App Notifications</string> -->
 
