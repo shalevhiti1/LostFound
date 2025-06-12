@@ -10,8 +10,11 @@ import android.widget.Toast; // ייבוא המחלקה Toast, המשמשת לה
 
 import androidx.appcompat.app.AppCompatActivity; // ייבוא מחלקת הבסיס AppCompatActivity, המספקת תאימות לאחור.
 
+import java.util.Locale;
 import java.util.concurrent.ExecutorService; // ייבוא ExecutorService, לניהול Threads ברקע.
 import java.util.concurrent.Executors; // ייבוא Executors, ליצירת מופעי ExecutorService.
+import android.speech.tts.TextToSpeech; // ייבוא TextToSpeech, לממשק טקסט לדיבור.
+
 
 /**
  * המחלקה {@code RegistrationActivity} אחראית על מסך ההרשמה של משתמשים חדשים באפליקציה.
@@ -20,6 +23,8 @@ import java.util.concurrent.Executors; // ייבוא Executors, ליצירת מ�
  * בהתאם לשם המשתמש שהוזן. פעולות מסד הנתונים מבוצעות ב-Thread רקע.
  */
 public class RegistrationActivity extends AppCompatActivity {
+    private TextToSpeech tts; // TTS instance
+    private boolean isTtsReady = false; // Flag for TTS initialization status
 
     // הצהרה על משתני ממשק המשתמש (EditText ו-Button).
     private EditText usernameEditText, passwordEditText, confirmPasswordEditText; // שדות קלט לשם משתמש, סיסמה ואימות סיסמה.
@@ -62,6 +67,18 @@ public class RegistrationActivity extends AppCompatActivity {
         passwordEditText = findViewById(R.id.passwordEditText);
         confirmPasswordEditText = findViewById(R.id.confirmPasswordEditText);
         registerButton = findViewById(R.id.registerButton);
+        // Initialize TextToSpeech engine
+        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    int result = tts.setLanguage(Locale.US);
+                    isTtsReady = result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED;
+                } else {
+                    isTtsReady = false;
+                }
+            }
+        });
 
         // הגדרת מאזין לחיצות (OnClickListener) עבור כפתור ההרשמה.
         // כאשר המשתמש לוחץ על כפתור זה, מתבצע תהליך ההרשמה.
@@ -77,6 +94,13 @@ public class RegistrationActivity extends AppCompatActivity {
                 if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password) || TextUtils.isEmpty(confirmPassword)) {
                     // הצגת הודעת שגיאה למשתמש.
                     Toast.makeText(RegistrationActivity.this, "Please fill in all fields.", Toast.LENGTH_SHORT).show();
+                    if (tts != null && isTtsReady) {
+                        if (tts.isSpeaking()) {
+                            tts.stop();
+                        }
+                        String detailsToSpeak = "Please fill in all fields.";
+                        tts.speak(detailsToSpeak, TextToSpeech.QUEUE_FLUSH, null, null);
+                    }
                     return; // יציאה מהמתודה.
                 }
 
@@ -84,6 +108,13 @@ public class RegistrationActivity extends AppCompatActivity {
                 if (!password.equals(confirmPassword)) {
                     // הצגת הודעת שגיאה למשתמש.
                     Toast.makeText(RegistrationActivity.this, "Passwords do not match.", Toast.LENGTH_SHORT).show();
+                    if (tts != null && isTtsReady) {
+                        if (tts.isSpeaking()) {
+                            tts.stop();
+                        }
+                        String detailsToSpeak = "Passwords do not match.";
+                        tts.speak(detailsToSpeak, TextToSpeech.QUEUE_FLUSH, null, null);
+                    }
                     return; // יציאה מהמתודה.
                 }
 
@@ -91,6 +122,13 @@ public class RegistrationActivity extends AppCompatActivity {
                 if (password.length() < 6 || !password.matches(".*[a-zA-Z].*")) {
                     // הצגת הודעת שגיאה למשתמש.
                     Toast.makeText(RegistrationActivity.this, "Password must be at least 6 characters and contain at least one letter.", Toast.LENGTH_SHORT).show();
+                    if (tts != null && isTtsReady) {
+                        if (tts.isSpeaking()) {
+                            tts.stop();
+                        }
+                        String detailsToSpeak = "Password must be at least 6 characters and contain at least one letter.";
+                        tts.speak(detailsToSpeak, TextToSpeech.QUEUE_FLUSH, null, null);
+                    }
                     return; // יציאה מהמתודה.
                 }
 

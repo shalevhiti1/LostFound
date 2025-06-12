@@ -183,20 +183,6 @@ public class CaseDetailsActivity extends AppCompatActivity {
                                 }
                                 String detailsToSpeak = "Case ID: " + request.getId() + ". " +
                                         "Item type: " + request.getItemType() + ". " +
-                                        "Color: " + request.getColor() + ". " +
-                                        "Brand: " + request.getBrand() + ". " +
-                                        "Owner name: " + request.getOwnerName() + ". " +
-                                        "Loss description: " + request.getLossDescription() + ". " +
-                                        "Trip date: " + dateFormat.format(request.getTripDate()) + ". " +
-                                        "Trip time: " + request.getTripTime() + ". " +
-                                        "Origin: " + request.getOrigin() + ". " +
-                                        "Destination: " + request.getDestination() + ". " +
-                                        "Line number: " + request.getLineNumber() + ". " +
-                                        "Reporter full name: " + request.getFullName() + ". " +
-                                        "Reporter ID card: " + request.getIdCard() + ". " +
-                                        "Reporter phone number: " + request.getPhoneNumber() + ". " +
-                                        "Reporter email: " + request.getEmail() + ". " +
-                                        "Reporter city: " + request.getCity() + ". " +
                                         "Status: " + request.getStatus() + ". " +
                                         "System comments: " + request.getSystemComments() + ".";
                                 tts.speak(detailsToSpeak, TextToSpeech.QUEUE_FLUSH, null, null);

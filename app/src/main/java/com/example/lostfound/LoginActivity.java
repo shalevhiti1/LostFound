@@ -7,6 +7,7 @@ import android.content.Intent; // ייבוא המחלקה Intent, המשמשת �
 import android.content.pm.PackageManager; // ייבוא PackageManager, המשמש לבדיקת הרשאות.
 import android.os.Build; // ייבוא Build, המשמש לבדיקת גרסת האנדרואיד הנוכחית.
 import android.os.Bundle; // ייבוא המחלקה Bundle, המשמשת לשמירה ושחזור מצב האקטיביטי.
+import android.util.Log;
 import android.view.View; // ייבוא המחלקה View, הבסיס לכל רכיבי ממשק המשתמש.
 import android.widget.Button; // ייבוא המחלקה Button, המשמשת ליצירת כפתורים.
 import android.widget.EditText; // ייבוא המחלקה EditText, המשמשת לשדות קלט טקסט.
@@ -17,8 +18,10 @@ import androidx.activity.result.contract.ActivityResultContracts; // ייבוא 
 import androidx.appcompat.app.AppCompatActivity; // ייבוא מחלקת הבסיס AppCompatActivity, המספקת תאימות לאחור.
 import androidx.core.content.ContextCompat; // ייבוא ContextCompat, המספק שיטות עזר לבדיקת הרשאות.
 
+import java.util.Locale;
 import java.util.concurrent.ExecutorService; // ייבוא ExecutorService, לניהול Threads ברקע.
 import java.util.concurrent.Executors; // ייבוא Executors, ליצירת מופעי ExecutorService.
+import android.speech.tts.TextToSpeech; // ייבוא TextToSpeech, לממשק טקסט לדיבור.
 
 // ייבוא לפונקציה הסטטית שניצור בשלב 3 (הנחה שהיא קיימת במחלקה NotificationUtils)
 import static com.example.lostfound.NotificationUtils.showSimpleNotification;
@@ -37,6 +40,10 @@ public class LoginActivity extends AppCompatActivity {
     private EditText passwordEditText; // שדה קלט עבור הסיסמה.
     private Button loginButton; // כפתור התחברות.
     private Button registerButton; // כפתור הרשמה.
+    private TextToSpeech tts; // TTS instance
+    private boolean isTtsReady = false; // Flag for TTS initialization status
+
+
     /**
      * מופע של {@code DatabaseHelper} לביצוע פעולות על מסד הנתונים.
      */
@@ -95,6 +102,19 @@ public class LoginActivity extends AppCompatActivity {
         // אתחול שירות ה-ExecutorService לביצוע משימות ב-Thread רקע.
         executorService = Executors.newSingleThreadExecutor();
 
+        // Initialize TextToSpeech engine
+        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    int result = tts.setLanguage(Locale.US);
+                    isTtsReady = result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED;
+                } else {
+                    isTtsReady = false;
+                }
+            }
+        });
+
         // יצירת ערוץ התראות.
         // יש לבצע זאת פעם אחת בלבד בעת הפעלת האפליקציה (או האקטיביטי הראשי).
         createNotificationChannel();
@@ -115,6 +135,13 @@ public class LoginActivity extends AppCompatActivity {
                 if (username.isEmpty() || password.isEmpty()) {
                     // הצגת הודעת שגיאה למשתמש.
                     Toast.makeText(LoginActivity.this, "Please enter username and password.", Toast.LENGTH_SHORT).show();
+                    if (tts != null && isTtsReady) {
+                        if (tts.isSpeaking()) {
+                            tts.stop();
+                        }
+                        String detailsToSpeak = "Please enter username and password.";
+                        tts.speak(detailsToSpeak, TextToSpeech.QUEUE_FLUSH, null, null);
+                    }
                     return; // יציאה מהמתודה.
                 }
 
@@ -152,6 +179,13 @@ public class LoginActivity extends AppCompatActivity {
                                 // מקרה חריג בו checkUser החזיר true אך getUserRole החזיר null.
 
                                 Toast.makeText(LoginActivity.this,"Invalid username or password.", Toast.LENGTH_SHORT).show();
+                                if (tts != null && isTtsReady) {
+                                    if (tts.isSpeaking()) {
+                                        tts.stop();
+                                    }
+                                    String detailsToSpeak = "Invalid username or password.";
+                                    tts.speak(detailsToSpeak, TextToSpeech.QUEUE_FLUSH, null, null);
+                                }
                                 return; // יציאה מהמתודה.
                             }
                         });
@@ -160,6 +194,13 @@ public class LoginActivity extends AppCompatActivity {
                         runOnUiThread(() -> {
 
                             Toast.makeText(LoginActivity.this, "Invalid username or password.", Toast.LENGTH_SHORT).show();
+                            if (tts != null && isTtsReady) {
+                                if (tts.isSpeaking()) {
+                                    tts.stop();
+                                }
+                                String detailsToSpeak = "Invalid username or password.";
+                                tts.speak(detailsToSpeak, TextToSpeech.QUEUE_FLUSH, null, null);
+                            }
                             return; // יציאה מהמתודה.
                         });
                     }

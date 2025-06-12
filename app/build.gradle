@@ -30,11 +30,31 @@ android {
 
 dependencies {
 
+    // תלויות אנדרואיד קיימות
     implementation libs.appcompat
     implementation libs.material
     implementation libs.activity
     implementation libs.constraintlayout
+
+    // תלויות בדיקה קיימות
     testImplementation libs.junit
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
+
+    // חדש: תלות ב-Google Maps SDK
+    // ודא שאתה משתמש בגרסה העדכנית ביותר. ניתן למצוא את הגרסה העדכנית כאן:
+    // https://developers.google.com/maps/documentation/android-sdk/start#add_the_sdk_as_a_dependency
+    implementation 'com.google.android.gms:play-services-maps:18.2.0' // גרסה עדכנית נפוצה
+
+    // חדש: תלות ב-Google Places SDK (לגיאו-קידוד - המרת כתובות לקואורדינטות ולהיפך)
+    // ודא שאתה משתמש בגרסה העדכנית ביותר.
+    // https://developers.google.com/maps/documentation/places/android-sdk/start#add_the_sdk_as_a_dependency
+    implementation 'com.google.android.libraries.places:places:3.4.0' // גרסה עדכנית נפוצה
+
+    // חדש: תלויות עבור Coroutines ו-Lifecycle (לטיפול במשימות אסינכרוניות כמו Geocoding)
+    // גרסאות עדכניות:
+    // https://developer.android.com/jetpack/androidx/releases/lifecycle
+    // https://github.com/Kotlin/kotlinx.coroutines
+    implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.0' // גרסה עדכנית נפוצה
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3' // גרסה עדכנית נפוצה
 }
