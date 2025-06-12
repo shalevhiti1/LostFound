@@ -3,53 +3,58 @@ package com.example.lostfound;
 import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Handler; // NEW: ייבוא Handler
+import android.os.Handler;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
-import android.speech.tts.TextToSpeech; // ייבוא TextToSpeech, לממשק טקסט לדיבור.
-
+import android.speech.tts.TextToSpeech;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.cardview.widget.CardView;
 
 import java.text.SimpleDateFormat;
-import java.util.Date; // ייבוא Date
+import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
-import java.util.concurrent.TimeUnit; // NEW: ייבוא TimeUnit
+import java.util.concurrent.TimeUnit;
 
+/**
+ * מסך פרטי פנייה: הצגת כל פרטי הבקשה, כתובת, קואורדינטות, טיימר, TTS ואפשרות עריכה לאדמין.
+ */
 public class CaseDetailsActivity extends AppCompatActivity {
 
     private DatabaseHelper dbHelper;
     private ExecutorService executorService;
-    private TextToSpeech tts; // TTS instance
-    private boolean isTtsReady = false; // Flag for TTS initialization status
+    private TextToSpeech tts;
+    private boolean isTtsReady = false;
 
-    // Declare TextViews for all details
     private TextView itemTypeTextView, colorTextView, brandTextView, ownerNameTextView, lossDescriptionTextView;
     private TextView tripDateTextView, tripTimeTextView, originTextView, destinationTextView, lineNumberTextView;
     private TextView fullNameTextView, idCardTextView, phoneNumberTextView, emailTextView, cityTextView;
     private TextView requestIdTextView;
     private TextView statusTextView;
     private TextView systemCommentsTextView;
-    private TextView countdownTextView; // NEW: TextView for countdown
-
+    private TextView countdownTextView;
+    private TextView locationAddressLabel;
+    private TextView locationAddressTextView;
+    private TextView latitudeLabel, latitudeTextView, longitudeLabel, longitudeTextView;
+    private View latLngLayout;
+    private View locationAddressLayout;
+    private Button showOnMapButton;
     private Button editCaseButton;
     private CardView editCaseButtonCard;
-    private Button readDetailsButton; // NEW: Read Details button
-    private CardView readDetailsButtonCard; // NEW: Read Details button card
+    private Button readDetailsButton;
+    private CardView readDetailsButtonCard;
     private String loggedInUsername;
 
-    private Handler countdownHandler; // NEW: Handler for countdown updates
-    private Runnable countdownRunnable; // NEW: Runnable for countdown logic
-    private long deadlineMillis; // NEW: Stores the deadline in milliseconds
+    private Handler countdownHandler;
+    private Runnable countdownRunnable;
+    private long deadlineMillis;
 
-    // Define the processing time (3 business days)
-    private static final long PROCESSING_TIME_MILLIS = 3 * 24 * 60 * 60 * 1000L; // 3 days in milliseconds
+    private static final long PROCESSING_TIME_MILLIS = 3 * 24 * 60 * 60 * 1000L;
 
     @SuppressLint("SetTextI18n")
     @Override
@@ -57,7 +62,6 @@ public class CaseDetailsActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_case_details);
 
-        // Initialize TextViews
         itemTypeTextView = findViewById(R.id.itemTypeTextView);
         colorTextView = findViewById(R.id.colorTextView);
         brandTextView = findViewById(R.id.brandTextView);
@@ -76,44 +80,37 @@ public class CaseDetailsActivity extends AppCompatActivity {
         requestIdTextView = findViewById(R.id.requestIdTextView);
         statusTextView = findViewById(R.id.statusTextView);
         systemCommentsTextView = findViewById(R.id.systemCommentsTextView);
-        countdownTextView = findViewById(R.id.countdownTextView); // NEW: Initialize countdown TextView
+        countdownTextView = findViewById(R.id.countdownTextView);
+        locationAddressLayout = findViewById(R.id.locationAddressLayout);
 
-        // Initialize the edit button and its CardView
+        locationAddressLabel = findViewById(R.id.locationAddressLabel);
+        locationAddressTextView = findViewById(R.id.locationAddressTextView);
+
+        latLngLayout = findViewById(R.id.latLngLayout);
+        latitudeLabel = findViewById(R.id.latitudeLabel);
+        latitudeTextView = findViewById(R.id.latitudeTextView);
+        longitudeLabel = findViewById(R.id.longitudeLabel);
+        longitudeTextView = findViewById(R.id.longitudeTextView);
+        showOnMapButton = findViewById(R.id.showOnMapButton);
+
         editCaseButton = findViewById(R.id.editCaseButton);
         editCaseButtonCard = findViewById(R.id.editCaseButtonCard);
-
-        // Initialize the read details button and its CardView
         readDetailsButton = findViewById(R.id.readDetailsButton);
         readDetailsButtonCard = findViewById(R.id.readDetailsButtonCard);
 
-        // Initialize DatabaseHelper and ExecutorService
         dbHelper = new DatabaseHelper(this);
         executorService = Executors.newSingleThreadExecutor();
 
-        // Get the request ID and logged-in username from the Intent
         int requestId = getIntent().getIntExtra("REQUEST_ID", -1);
         loggedInUsername = getIntent().getStringExtra("username");
 
-        // Log the received username
-        Log.d("CaseDetailsActivity", "Received username: " + (loggedInUsername != null ? loggedInUsername : "null"));
-
-        // Initialize TextToSpeech engine
         tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
                 if (status == TextToSpeech.SUCCESS) {
                     int result = tts.setLanguage(Locale.US);
-                    if (result == TextToSpeech.LANG_MISSING_DATA || result == TextToSpeech.LANG_NOT_SUPPORTED) {
-                        Log.e("TTS", "This Language is not supported or missing data.");
-                        Toast.makeText(CaseDetailsActivity.this, "Language not supported for speech.", Toast.LENGTH_SHORT).show();
-                        isTtsReady = false;
-                    } else {
-                        Log.d("TTS", "TTS Initialization Success. Language set to English.");
-                        isTtsReady = true;
-                    }
+                    isTtsReady = result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED;
                 } else {
-                    Log.e("TTS", "TTS Initialization Failed! Status: " + status);
-                    Toast.makeText(CaseDetailsActivity.this, "Speech initialization failed.", Toast.LENGTH_SHORT).show();
                     isTtsReady = false;
                 }
             }
@@ -126,8 +123,6 @@ public class CaseDetailsActivity extends AppCompatActivity {
                 if (loggedInUsername != null) {
                     userRole = dbHelper.getUserRole(loggedInUsername);
                 }
-
-                Log.d("CaseDetailsActivity", "User role for " + loggedInUsername + ": " + (userRole != null ? userRole : "null"));
 
                 String finalUserRole = userRole;
                 runOnUiThread(() -> {
@@ -154,28 +149,81 @@ public class CaseDetailsActivity extends AppCompatActivity {
                         emailTextView.setText("Reporter Email: " + request.getEmail());
                         cityTextView.setText("Reporter City: " + request.getCity());
 
+                        String status = request.getStatus();
                         if (statusTextView != null) {
-                            statusTextView.setText("Status: " + request.getStatus());
+                            statusTextView.setText("Status: " + status);
                         }
                         if (systemCommentsTextView != null) {
                             systemCommentsTextView.setText("System Comments: " + request.getSystemComments());
                         }
 
-                        // Show edit button only if the logged-in user is an admin
+                        if (status != null && (
+                                status.equals("אבידה נמצאה") ||
+                                        status.equals("Found") ||
+                                        status.equals(getString(R.string.status_found))
+                        )) {
+                            if (locationAddressLabel != null) locationAddressLabel.setVisibility(View.VISIBLE);
+                            if (locationAddressTextView != null) {
+                                locationAddressTextView.setVisibility(View.VISIBLE);
+                                String addr = request.getLocationAddress();
+                                if (addr != null && !addr.trim().isEmpty()) {
+                                    locationAddressTextView.setText(addr);
+                                } else {
+                                    String toastMsg = "Lost & Found address not assigned yet.";
+                                    locationAddressTextView.setText(toastMsg);
+                                    Toast.makeText(CaseDetailsActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
+                                    speakIfTtsReady(toastMsg);
+                                }
+                            }
+                        } else {
+                            if (locationAddressLabel != null) locationAddressLabel.setVisibility(View.GONE);
+                            if (locationAddressTextView != null) locationAddressTextView.setVisibility(View.GONE);
+                        }
+
+                        String address = request.getLocationAddress();
+                        Double latitude = request.getLatitude();
+                        Double longitude = request.getLongitude();
+                        if (latitude != null && longitude != null && address != null) {
+                            if (latLngLayout != null) latLngLayout.setVisibility(View.VISIBLE);
+                            if (latitudeLabel != null) latitudeLabel.setVisibility(View.VISIBLE);
+                            if (longitudeLabel != null) longitudeLabel.setVisibility(View.VISIBLE);
+                            if (locationAddressLayout != null) locationAddressLayout.setVisibility(View.VISIBLE);
+                            if (locationAddressLabel != null) locationAddressLabel.setVisibility(View.VISIBLE);
+                            if (locationAddressLabel != null) locationAddressLabel.setText("Lost Found Department Address:"+ address);
+                            if (locationAddressTextView != null) locationAddressTextView.setText(address);
+                            if (latitudeTextView != null) latitudeTextView.setText(String.valueOf(latitude));
+                            if (longitudeTextView != null) longitudeTextView.setText(String.valueOf(longitude));
+                            if (showOnMapButton != null) {
+                                showOnMapButton.setVisibility(View.VISIBLE);
+                                showOnMapButton.setOnClickListener(v -> {
+                                    String uri = "geo:" + latitude + "," + longitude + "?q=" + latitude + "," + longitude + "(" + (request.getLocationAddress() != null ? request.getLocationAddress() : "") + ")";
+                                    Intent mapIntent = new Intent(Intent.ACTION_VIEW, android.net.Uri.parse(uri));
+                                    mapIntent.setPackage("com.google.android.apps.maps");
+                                    try {
+                                        startActivity(mapIntent);
+                                    } catch (Exception e) {
+                                        String toastMsg = "Google Maps not installed.";
+                                        Toast.makeText(this, toastMsg, Toast.LENGTH_SHORT).show();
+                                        speakIfTtsReady(toastMsg);
+                                    }
+                                });
+                            }
+                        } else {
+                            if (latLngLayout != null) latLngLayout.setVisibility(View.GONE);
+                            if (showOnMapButton != null) showOnMapButton.setVisibility(View.GONE);
+                        }
+
                         if (finalUserRole != null && finalUserRole.equals("admin")) {
-                            Log.d("CaseDetailsActivity", "Showing edit button for admin.");
                             editCaseButtonCard.setVisibility(View.VISIBLE);
                             editCaseButton.setOnClickListener(v -> {
                                 Intent editIntent = new Intent(CaseDetailsActivity.this, AdminEditCaseActivity.class);
-                                editIntent.putExtra("REQUEST_ID", requestId);
+                                editIntent.putExtra("REQUEST_ID", request.getId());
                                 startActivity(editIntent);
                             });
                         } else {
-                            Log.d("CaseDetailsActivity", "Hiding edit button. User is not admin or role is null.");
                             editCaseButtonCard.setVisibility(View.GONE);
                         }
 
-                        // Set OnClickListener for the Read Details button
                         readDetailsButton.setOnClickListener(v -> {
                             if (tts != null && isTtsReady) {
                                 if (tts.isSpeaking()) {
@@ -185,53 +233,88 @@ public class CaseDetailsActivity extends AppCompatActivity {
                                         "Item type: " + request.getItemType() + ". " +
                                         "Status: " + request.getStatus() + ". " +
                                         "System comments: " + request.getSystemComments() + ".";
+                                if (status != null && (
+                                        status.equals("אבידה נמצאה") ||
+                                                status.equals("Found") ||
+                                                status.equals(getString(R.string.status_found))
+                                )) {
+                                    String addr = request.getLocationAddress();
+                                    if (addr != null && !addr.trim().isEmpty()) {
+                                        detailsToSpeak += " The item is waiting at: " + addr + ".";
+                                    }
+                                }
+                                if (latitude != null && longitude != null) {
+                                    detailsToSpeak += " Location coordinates: latitude " + latitude + ", longitude " + longitude + ".";
+                                }
                                 tts.speak(detailsToSpeak, TextToSpeech.QUEUE_FLUSH, null, null);
                             } else {
-                                Log.e("TTS", "TTS not ready to speak. isTtsReady: " + isTtsReady);
-                                Toast.makeText(CaseDetailsActivity.this, "Speech not ready. Please try again.", Toast.LENGTH_SHORT).show();
+                                String toastMsg = "Speech not ready. Please try again.";
+                                Toast.makeText(CaseDetailsActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
+                                speakIfTtsReady(toastMsg);
                             }
                         });
 
-                        // NEW: Initialize countdown timer
                         deadlineMillis = request.getCreationTimestamp() + PROCESSING_TIME_MILLIS;
                         countdownHandler = new Handler();
                         countdownRunnable = new Runnable() {
                             @Override
                             public void run() {
                                 updateCountdown();
-                                countdownHandler.postDelayed(this, 1000); // Update every second
+                                countdownHandler.postDelayed(this, 1000);
                             }
                         };
-                        countdownHandler.post(countdownRunnable); // Start the countdown
+                        countdownHandler.post(countdownRunnable);
                     } else {
-                        Toast.makeText(CaseDetailsActivity.this, "Request not found.", Toast.LENGTH_LONG).show();
+                        String toastMsg = "Request not found.";
+                        Toast.makeText(CaseDetailsActivity.this, toastMsg, Toast.LENGTH_LONG).show();
+                        speakIfTtsReady(toastMsg);
                         finish();
                     }
                 });
             });
         } else {
-            Toast.makeText(this, "No request ID provided.", Toast.LENGTH_LONG).show();
+            String toastMsg = "No request ID provided.";
+            Toast.makeText(this, toastMsg, Toast.LENGTH_LONG).show();
+            speakIfTtsReady(toastMsg);
             finish();
         }
     }
 
-    /**
-     * NEW: Updates the countdown TextView with the remaining time.
-     * Calculates the difference between the deadline and the current time,
-     * then formats and displays it. Stops the countdown if the deadline is passed.
-     */
+    private void speakIfTtsReady(String text) {
+        if (tts != null && isTtsReady) {
+            if (tts.isSpeaking()) {
+                tts.stop();
+            }
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+        }
+    }
+
     @SuppressLint("SetTextI18n")
     private void updateCountdown() {
         long currentTime = System.currentTimeMillis();
         long timeLeft = deadlineMillis - currentTime;
+        int requestId = getIntent().getIntExtra("REQUEST_ID", -1);
+        Request request=dbHelper.getRequestById(requestId);
+        String status=request.getStatus();
+        if (!status.equals("IN_PROGRESS")){
+            String toastMsg = "Case closed.";
 
-        if (timeLeft <= 0) {
-            countdownTextView.setText("Time left: Processing time elapsed.");
+            countdownTextView.setText(toastMsg);
             countdownTextView.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
             if (countdownHandler != null) {
-                countdownHandler.removeCallbacks(countdownRunnable); // Stop updating
+                countdownHandler.removeCallbacks(countdownRunnable);
             }
-        } else {
+        }
+        else if (timeLeft <= 0) {
+            String toastMsg = "Time left: Processing time elapsed.";
+
+            countdownTextView.setText(toastMsg);
+            countdownTextView.setTextColor(getResources().getColor(android.R.color.holo_red_dark));
+            if (countdownHandler != null) {
+                countdownHandler.removeCallbacks(countdownRunnable);
+            }
+        }
+        else {
             long days = TimeUnit.MILLISECONDS.toDays(timeLeft);
             timeLeft -= TimeUnit.DAYS.toMillis(days);
             long hours = TimeUnit.MILLISECONDS.toHours(timeLeft);
@@ -244,27 +327,18 @@ public class CaseDetailsActivity extends AppCompatActivity {
                     "Time left: %d days, %d hours, %d minutes, %d seconds",
                     days, hours, minutes, seconds);
             countdownTextView.setText(countdownText);
-            countdownTextView.setTextColor(getResources().getColor(R.color.orange_700)); // Using a color from resources
+            countdownTextView.setTextColor(getResources().getColor(R.color.orange_700));
         }
     }
 
-
-    /**
-     * מתודת מחזור החיים {@code onDestroy} נקראת כאשר האקטיביטי נהרס.
-     * חשוב לכבות את שירות ה-ExecutorService כאן כדי לשחרר משאבים ולמנוע דליפות זיכרון.
-     * כמו כן, יש לכבות את מנוע ה-TextToSpeech כדי לשחרר את המשאבים שלו.
-     * NEW: עוצר את הספירה לאחור כדי למנוע דליפות זיכרון.
-     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        executorService.shutdown(); // כיבוי מסודר של ה-ExecutorService.
-        // כיבוי מנוע ה-TTS כדי לשחרר משאבים.
+        executorService.shutdown();
         if (tts != null) {
-            tts.stop(); // עצור כל דיבור מתבצע.
-            tts.shutdown(); // שחרר את משאבי ה-TTS.
+            tts.stop();
+            tts.shutdown();
         }
-        // NEW: עצירת הספירה לאחור
         if (countdownHandler != null) {
             countdownHandler.removeCallbacks(countdownRunnable);
         }

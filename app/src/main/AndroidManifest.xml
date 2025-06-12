@@ -25,20 +25,11 @@
         android:theme="@style/Theme.LostFound"
         tools:targetApi="31">
 
-        <!-- תג ה-meta-data של Google Maps SDK. החלף את "YOUR_GOOGLE_MAPS_API_KEY" במפתח האמיתי שלך. -->
-        <!-- כדי להשיג מפתח API:
-             1. עבור אל Google Cloud Console: https://console.cloud.google.com/
-             2. צור פרויקט חדש או בחר פרויקט קיים.
-             3. וודא ש-Maps SDK for Android מופעל עבור הפרויקט שלך.
-             4. צור מפתח API (credentials -> Create credentials -> API key).
-             5. הגבל את המפתח רק לאפליקציית האנדרואיד שלך (Android apps) לפי שם החבילה וחתימת ה-SHA-1.
-        -->
         <meta-data
             android:name="com.google.android.geo.API_KEY"
-            android:value="YOUR_GOOGLE_MAPS_API_KEY" />
+            android:value="AIzaSyC-pDMqYGHqgu4cr-r2Ah87RSE_a4EGd7I" />
 
-        <!-- הגדרת פעילות המפה כ-Activity רגיל - אם תצטרך פעילות מפה נפרדת -->
-        <!-- פעילויות קיימות -->
+
         <activity
             android:exported="false"
             android:name="com.example.lostfound.LoginActivity" />

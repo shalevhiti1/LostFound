@@ -1,49 +1,65 @@
 package com.example.lostfound;
 
-import android.content.BroadcastReceiver; // ייבוא BroadcastReceiver, מחלקת בסיס לקבלת שידורים כלליים.
-import android.content.Context; // ייבוא Context, המספק גישה למשאבי האפליקציה ושירותים.
-import android.content.Intent; // ייבוא Intent, המשמש להעברת הודעות בין רכיבים.
-import android.util.Log; // ייבוא Log, לרישום הודעות דיבוג.
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.util.Log;
 
-// ייבוא לפונקציה הסטטית של הנוטיפיקציה
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import static com.example.lostfound.NotificationUtils.showSimpleNotification;
 
-/**
- * המחלקה {@code NotificationReceiver} היא {@code BroadcastReceiver} המיועדת לקבל
- * אירועים מ-{@code AlarmManager} ולשלוח התראות למשתמש.
- * היא מקבלת את פרטי ההתראה (כותרת, הודעה, ID) מתוך ה-Intent שהופעל
- * ומפעילה את {@code NotificationUtils.showSimpleNotification} כדי להציג אותה.
- */
 public class NotificationReceiver extends BroadcastReceiver {
 
-    // קבועים עבור מפתחות הנתונים ב-Intent
     public static final String NOTIFICATION_TITLE = "notification_title";
     public static final String NOTIFICATION_MESSAGE = "notification_message";
     public static final String NOTIFICATION_ID = "notification_id";
+    // נוסיף קבוע למזהה הפנייה
+    public static final String REQUEST_ID = "request_id"; // חייב לוודא שגם ב-scheduleNotification אתה מעביר זאת!
 
-    /**
-     * מתודה זו נקראת כאשר ה-{@code BroadcastReceiver} מקבל {@code Intent} משודר.
-     * כאן, היא מטפלת ב-Intent שהופעל על ידי {@code AlarmManager} כדי להציג התראה.
-     *
-     * @param context הקונטקסט שבו ה-Receiver פועל.
-     * @param intent ה-Intent שהתקבל, המכיל את פרטי ההתראה.
-     */
     @Override
     public void onReceive(Context context, Intent intent) {
         Log.d("NotificationReceiver", "Received broadcast to show notification.");
 
-        // שליפת פרטי ההתראה מה-Intent.
         String title = intent.getStringExtra(NOTIFICATION_TITLE);
         String message = intent.getStringExtra(NOTIFICATION_MESSAGE);
-        int notificationId = intent.getIntExtra(NOTIFICATION_ID, 0); // ברירת מחדל 0 אם לא נמצא
+        int notificationId = intent.getIntExtra(NOTIFICATION_ID, 0);
 
-        // בדיקה אם הפרטים חוקיים לפני הצגת ההתראה.
-        if (title != null && message != null) {
-            Log.d("NotificationReceiver", "Showing notification: " + title + " - " + message);
-            // קריאה למתודה הסטטית ב-NotificationUtils כדי להציג את ההתראה.
-            showSimpleNotification(context, title, message, notificationId);
-        } else {
-            Log.e("NotificationReceiver", "Notification details are missing from Intent.");
+        // שליפת מזהה הפנייה
+        int requestId = intent.getIntExtra(REQUEST_ID, -1);
+
+        if (requestId == -1) {
+            // לא ניתן לבדוק סטטוס, נוהגים כמו קודם (למקרה תאימות לאחור)
+            if (title != null && message != null) {
+                Log.d("NotificationReceiver", "Showing notification: " + title + " - " + message);
+                showSimpleNotification(context, title, message, notificationId);
+            } else {
+                Log.e("NotificationReceiver", "Notification details are missing from Intent.");
+            }
+            return;
         }
+
+        // נבדוק את הסטטוס במסד הנתונים
+        ExecutorService executor = Executors.newSingleThreadExecutor();
+        executor.execute(() -> {
+            DatabaseHelper dbHelper = new DatabaseHelper(context);
+            Request request = dbHelper.getRequestById(requestId);
+
+            if (request != null) {
+                String status = request.getStatus();
+                if (status != null && (
+                        status.equals("IN_PROGRESS"))) {
+                    // רק אם עדיין בתהליך - מציגים התראה!
+                    Log.d("NotificationReceiver", "Request " + requestId + " is still pending, showing notification.");
+                    showSimpleNotification(context, title, message, notificationId);
+                } else {
+                    Log.d("NotificationReceiver", "Request " + requestId + " is NOT pending anymore, not showing notification.");
+                }
+            } else {
+                Log.e("NotificationReceiver", "Request with id " + requestId + " not found in DB.");
+            }
+            executor.shutdown();
+        });
     }
 }

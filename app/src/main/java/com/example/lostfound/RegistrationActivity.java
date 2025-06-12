@@ -50,19 +50,12 @@ public class RegistrationActivity extends AppCompatActivity {
      */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        // קריאה למתודת onCreate של מחלקת האב (AppCompatActivity) לביצוע אתחול בסיסי.
         super.onCreate(savedInstanceState);
-        // הגדרת קובץ ה-Layout (עיצוב הממשק) עבור מסך זה.
-        // R.layout.activity_registration מפנה לקובץ ה-XML שמגדיר את מבנה המסך.
         setContentView(R.layout.activity_registration);
 
-        // אתחול מופע של DatabaseHelper לגישה למסד הנתונים.
         dbHelper = new DatabaseHelper(this);
-        // אתחול שירות ה-ExecutorService לביצוע משימות ב-Thread רקע.
         executorService = Executors.newSingleThreadExecutor();
 
-        // קישור רכיבי ממשק המשתמש (EditTexts ו-Button) מתוך קובץ ה-XML.
-        // findViewById() מאתר את הרכיבים בקובץ ה-Layout לפי ה-ID שלהם.
         usernameEditText = findViewById(R.id.usernameEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         confirmPasswordEditText = findViewById(R.id.confirmPasswordEditText);
@@ -80,106 +73,106 @@ public class RegistrationActivity extends AppCompatActivity {
             }
         });
 
-        // הגדרת מאזין לחיצות (OnClickListener) עבור כפתור ההרשמה.
-        // כאשר המשתמש לוחץ על כפתור זה, מתבצע תהליך ההרשמה.
         registerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // קבלת שם המשתמש, הסיסמה ואימות הסיסמה משדות הקלט, תוך הסרת רווחים מיותרים.
                 String username = usernameEditText.getText().toString().trim();
                 String password = passwordEditText.getText().toString().trim();
                 String confirmPassword = confirmPasswordEditText.getText().toString().trim();
 
-                // ולידציה בסיסית: ודא שכל שדות הקלט מלאים.
                 if (TextUtils.isEmpty(username) || TextUtils.isEmpty(password) || TextUtils.isEmpty(confirmPassword)) {
-                    // הצגת הודעת שגיאה למשתמש.
-                    Toast.makeText(RegistrationActivity.this, "Please fill in all fields.", Toast.LENGTH_SHORT).show();
+                    String toastMsg = "Please fill in all fields.";
+                    Toast.makeText(RegistrationActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
                     if (tts != null && isTtsReady) {
                         if (tts.isSpeaking()) {
                             tts.stop();
                         }
-                        String detailsToSpeak = "Please fill in all fields.";
-                        tts.speak(detailsToSpeak, TextToSpeech.QUEUE_FLUSH, null, null);
+                        tts.speak(toastMsg, TextToSpeech.QUEUE_FLUSH, null, null);
                     }
-                    return; // יציאה מהמתודה.
+                    return;
                 }
 
-                // ולידציה: ודא שהסיסמאות שהוזנו תואמות.
                 if (!password.equals(confirmPassword)) {
-                    // הצגת הודעת שגיאה למשתמש.
-                    Toast.makeText(RegistrationActivity.this, "Passwords do not match.", Toast.LENGTH_SHORT).show();
+                    String toastMsg = "Passwords do not match.";
+                    Toast.makeText(RegistrationActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
                     if (tts != null && isTtsReady) {
                         if (tts.isSpeaking()) {
                             tts.stop();
                         }
-                        String detailsToSpeak = "Passwords do not match.";
-                        tts.speak(detailsToSpeak, TextToSpeech.QUEUE_FLUSH, null, null);
+                        tts.speak(toastMsg, TextToSpeech.QUEUE_FLUSH, null, null);
                     }
-                    return; // יציאה מהמתודה.
+                    return;
                 }
 
-                // ולידציה: ודא שהסיסמה עומדת בדרישות (לפחות 6 תווים ומכילה לפחות אות אחת).
                 if (password.length() < 6 || !password.matches(".*[a-zA-Z].*")) {
-                    // הצגת הודעת שגיאה למשתמש.
-                    Toast.makeText(RegistrationActivity.this, "Password must be at least 6 characters and contain at least one letter.", Toast.LENGTH_SHORT).show();
+                    String toastMsg = "Password must be at least 6 characters and contain at least one letter.";
+                    Toast.makeText(RegistrationActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
                     if (tts != null && isTtsReady) {
                         if (tts.isSpeaking()) {
                             tts.stop();
                         }
-                        String detailsToSpeak = "Password must be at least 6 characters and contain at least one letter.";
-                        tts.speak(detailsToSpeak, TextToSpeech.QUEUE_FLUSH, null, null);
+                        tts.speak(toastMsg, TextToSpeech.QUEUE_FLUSH, null, null);
                     }
-                    return; // יציאה מהמתודה.
+                    return;
                 }
 
-                // ביצוע פעולות מסד הנתונים (בדיקת שם משתמש קיים והוספת משתמש) ב-Thread רקע.
-                // זה מונע חסימת ממשק המשתמש בזמן שהאפליקציה מתקשרת עם מסד הנתונים.
                 executorService.execute(() -> {
-                    // בדיקה אם שם המשתמש כבר קיים במסד הנתונים.
                     if (dbHelper.checkUsername(username)) {
-                        // חזרה ל-Thread הראשי (UI Thread) כדי להציג הודעת שגיאה.
-                        runOnUiThread(() -> Toast.makeText(RegistrationActivity.this, "Username already exists.", Toast.LENGTH_SHORT).show());
-                        return; // יציאה מהלמבדה (משימת הרקע) אם שם המשתמש קיים.
-                    }
-
-                    // קביעת תפקיד המשתמש בהתבסס על שם המשתמש שהוזן.
-                    String role = "user"; // תפקיד ברירת מחדל הוא "user".
-                    if (username.equals("admin")) {
-                        role = "admin"; // אם שם המשתמש הוא "admin", התפקיד הוא "admin".
-                    } else if (username.equals("South") || username.equals("North") || username.equals("Center") || username.equals("Jerusalem")) {
-                        role = "representative"; // אם שם המשתמש הוא אחד מהמחוזות, התפקיד הוא "representative".
-                    }
-
-                    // הוספת המשתמש החדש למסד הנתונים.
-                    if (dbHelper.addUser(username, password, role)) {
-                        // אם ההרשמה הצליחה, חזור ל-Thread הראשי והצג הודעת הצלחה.
                         runOnUiThread(() -> {
-                            Toast.makeText(RegistrationActivity.this, "Registration successful!", Toast.LENGTH_SHORT).show();
-                            // יצירת Intent למעבר למסך UserDetailsActivity.
+                            String toastMsg = "Username already exists.";
+                            Toast.makeText(RegistrationActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
+                            if (tts != null && isTtsReady) {
+                                if (tts.isSpeaking()) {
+                                    tts.stop();
+                                }
+                                tts.speak(toastMsg, TextToSpeech.QUEUE_FLUSH, null, null);
+                            }
+                        });
+                        return;
+                    }
+
+                    String role = "user";
+                    if (username.equals("admin")) {
+                        role = "admin";
+                    } else if (username.equals("South") || username.equals("North") || username.equals("Center") || username.equals("Jerusalem")) {
+                        role = "representative";
+                    }
+
+                    if (dbHelper.addUser(username, password, role)) {
+                        runOnUiThread(() -> {
+                            String toastMsg = "Registration successful!";
+                            Toast.makeText(RegistrationActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
+                            if (tts != null && isTtsReady) {
+                                if (tts.isSpeaking()) {
+                                    tts.stop();
+                                }
+                                tts.speak(toastMsg, TextToSpeech.QUEUE_FLUSH, null, null);
+                            }
                             Intent intent = new Intent(RegistrationActivity.this, UserDetailsActivity.class);
-                            // העברת שם המשתמש למסך UserDetailsActivity.
                             intent.putExtra("username", username);
-                            // הפעלת המסך החדש.
                             startActivity(intent);
-                            // סגירת RegistrationActivity לאחר הרשמה מוצלחת.
                             finish();
                         });
                     } else {
-                        // אם ההרשמה נכשלה, חזור ל-Thread הראשי והצג הודעת כישלון.
-                        runOnUiThread(() -> Toast.makeText(RegistrationActivity.this, "Registration failed. Please try again.", Toast.LENGTH_SHORT).show());
+                        runOnUiThread(() -> {
+                            String toastMsg = "Registration failed. Please try again.";
+                            Toast.makeText(RegistrationActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
+                            if (tts != null && isTtsReady) {
+                                if (tts.isSpeaking()) {
+                                    tts.stop();
+                                }
+                                tts.speak(toastMsg, TextToSpeech.QUEUE_FLUSH, null, null);
+                            }
+                        });
                     }
                 });
             }
         });
     }
 
-    /**
-     * מתודת מחזור החיים {@code onDestroy} נקראת כאשר האקטיביטי נהרס.
-     * חשוב לכבות את שירות ה-ExecutorService כאן כדי לשחרר משאבים ולמנוע דליפות זיכרון.
-     */
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        executorService.shutdown(); // כיבוי מסודר של ה-ExecutorService.
+        executorService.shutdown();
     }
 }

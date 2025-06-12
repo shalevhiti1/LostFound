@@ -73,7 +73,72 @@
         android:lines="4"
         android:gravity="top"
         android:padding="12dp"
-        android:layout_marginBottom="24dp"/>
+        android:layout_marginBottom="16dp"/>
+
+    <!-- Lost & Found Department Address (hidden by default, shown only if status is 'אבידה נמצאה'/'FOUND') -->
+    <TextView
+        android:id="@+id/locationAddressLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Lost Found Department Address:"
+        android:textSize="16sp"
+        android:layout_marginBottom="4dp"
+        android:visibility="gone"/>
+    <EditText
+        android:id="@+id/locationAddressEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter address for pickup"
+        android:inputType="textPostalAddress"
+        android:padding="12dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"/>
+
+    <!-- NEW: Latitude and Longitude fields, shown only if status is 'אבידה נמצאה'/'FOUND' -->
+    <TextView
+        android:id="@+id/latitudeLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Latitude:"
+        android:textSize="16sp"
+        android:layout_marginBottom="4dp"
+        android:visibility="gone"/>
+    <EditText
+        android:id="@+id/latitudeEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter latitude (optional)"
+        android:inputType="numberDecimal|numberSigned"
+        android:padding="12dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"/>
+
+    <TextView
+        android:id="@+id/longitudeLabel"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Longitude:"
+        android:textSize="16sp"
+        android:layout_marginBottom="4dp"
+        android:visibility="gone"/>
+    <EditText
+        android:id="@+id/longitudeEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter longitude (optional)"
+        android:inputType="numberDecimal|numberSigned"
+        android:padding="12dp"
+        android:layout_marginBottom="8dp"
+        android:visibility="gone"/>
+
+    <!-- NEW: Pick location from map & search (hidden by default, shown when needed) -->
+    <Button
+        android:id="@+id/pickLocationButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Choose loaction in map"
+        android:layout_marginBottom="24dp"
+        android:visibility="gone"/>
 
     <Button
         android:id="@+id/saveAdminChangesButton"

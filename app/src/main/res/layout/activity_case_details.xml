@@ -217,6 +217,87 @@
             android:textColor="#555555"
             android:layout_marginBottom="24dp"/>
 
+        <!-- NEW: Lost & Found Department Address Section -->
+
+        <LinearLayout
+            android:id="@+id/locationAddressLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:layout_marginBottom="8dp">
+            <TextView
+                android:id="@+id/locationAddressLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Lost Found Department Address:"
+                android:textSize="16sp"
+                android:layout_marginTop="12dp"
+                android:visibility="gone"/>
+
+            <TextView
+                android:id="@+id/locationAddressTextView"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="16sp"
+                android:layout_marginBottom="8dp"
+                android:visibility="gone"/>
+            </LinearLayout>
+
+
+        <!-- NEW: Latitude and Longitude Section (shown only if exist) -->
+        <LinearLayout
+            android:id="@+id/latLngLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:visibility="gone"
+            android:layout_marginBottom="8dp">
+
+            <TextView
+                android:id="@+id/latitudeLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="Latitude: "
+                android:textSize="16sp"
+                android:layout_marginEnd="6dp"/>
+
+            <TextView
+                android:id="@+id/latitudeTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="16sp"/>
+
+            <TextView
+                android:id="@+id/longitudeLabel"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="  Longitude: "
+                android:textSize="16sp"
+                android:layout_marginStart="12dp"
+                android:layout_marginEnd="6dp"/>
+
+            <TextView
+                android:id="@+id/longitudeTextView"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text=""
+                android:textSize="16sp"/>
+        </LinearLayout>
+
+        <!-- NEW: Show on Map Button (shown only if lat/lng exist) -->
+        <Button
+            android:id="@+id/showOnMapButton"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="Show on Map"
+            android:textColor="@android:color/white"
+            android:padding="12dp"
+            android:layout_marginBottom="16dp"
+            android:visibility="gone"/>
+
         <!-- CardView for Edit Case Button (visible only for admin) -->
         <androidx.cardview.widget.CardView
             android:id="@+id/editCaseButtonCard"
@@ -226,7 +307,7 @@
             app:cardCornerRadius="12dp"
             app:cardElevation="8dp"
             app:cardBackgroundColor="#FFFFFF"
-            android:visibility="gone"> <!-- Initially hidden -->
+            android:visibility="gone">
 
             <Button
                 android:id="@+id/editCaseButton"
