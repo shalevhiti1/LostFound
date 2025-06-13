@@ -12,6 +12,10 @@ import androidx.appcompat.app.AppCompatActivity;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import android.speech.tts.TextToSpeech; // ייבוא TextToSpeech
+
+import java.util.Locale; // ייבוא Locale ל-TTS
+
 /**
  * מסך עריכת פרטי משתמש: מאפשר עדכון שם, טלפון, אימייל ועיר.
  */
@@ -22,6 +26,10 @@ public class EditProfileActivity extends AppCompatActivity {
     private DatabaseHelper dbHelper;
     private String currentUsername;
     private ExecutorService executorService;
+
+    // משתני TTS
+    private TextToSpeech tts;
+    private boolean isTtsReady = false;
 
     /**
      * אתחול המסך, בדיקת שם משתמש, טעינת פרטי המשתמש והגדרת שמירה.
@@ -34,9 +42,24 @@ public class EditProfileActivity extends AppCompatActivity {
         dbHelper = new DatabaseHelper(this);
         executorService = Executors.newSingleThreadExecutor();
 
+        // אתחול TTS
+        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status == TextToSpeech.SUCCESS) {
+                    int result = tts.setLanguage(Locale.US);
+                    isTtsReady = result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED;
+                } else {
+                    isTtsReady = false;
+                }
+            }
+        });
+
         currentUsername = getIntent().getStringExtra("username");
         if (currentUsername == null || currentUsername.isEmpty()) {
-            Toast.makeText(this, "שגיאה: שם משתמש לא נמצא.", Toast.LENGTH_SHORT).show();
+            String errorMsg = "error: username not found.";
+            Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
+            speakIfTtsReady(errorMsg);
             finish();
             return;
         }
@@ -63,6 +86,11 @@ public class EditProfileActivity extends AppCompatActivity {
     protected void onDestroy() {
         super.onDestroy();
         executorService.shutdown();
+        // כיבוי TTS
+        if (tts != null) {
+            tts.stop();
+            tts.shutdown();
+        }
     }
 
     /**
@@ -99,12 +127,16 @@ public class EditProfileActivity extends AppCompatActivity {
 
         if (TextUtils.isEmpty(fullName) || TextUtils.isEmpty(idCard) ||
                 TextUtils.isEmpty(phoneNumber) || TextUtils.isEmpty(email) || TextUtils.isEmpty(city)) {
-            Toast.makeText(this, "אנא מלא את כל השדות.", Toast.LENGTH_SHORT).show();
+            String toastMsg = "please fill all fields.";
+            Toast.makeText(this, toastMsg, Toast.LENGTH_SHORT).show();
+            speakIfTtsReady(toastMsg);
             return;
         }
 
         if (!android.util.Patterns.EMAIL_ADDRESS.matcher(email).matches()) {
-            Toast.makeText(this, "אנא הזן כתובת אימייל חוקית.", Toast.LENGTH_SHORT).show();
+            String toastMsg = "Invalid email format.";
+            Toast.makeText(this, toastMsg, Toast.LENGTH_SHORT).show();
+            speakIfTtsReady(toastMsg);
             return;
         }
 
@@ -113,12 +145,28 @@ public class EditProfileActivity extends AppCompatActivity {
 
             runOnUiThread(() -> {
                 if (isUpdated) {
-                    Toast.makeText(EditProfileActivity.this, "פרטי המשתמש נשמרו בהצלחה!", Toast.LENGTH_SHORT).show();
+                    String toastMsg = "saves successfully!";
+                    Toast.makeText(EditProfileActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
+                    speakIfTtsReady(toastMsg);
                     finish();
                 } else {
-                    Toast.makeText(EditProfileActivity.this, "שמירת הפרטים נכשלה. נסה שוב.", Toast.LENGTH_SHORT).show();
+                    String toastMsg = "שמירת הפרטים נכשלה. נסה שוב.";
+                    Toast.makeText(EditProfileActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
+                    speakIfTtsReady(toastMsg);
                 }
             });
         });
+    }
+
+    /**
+     * משמיע הודעה קולית אם TTS מוכן.
+     */
+    private void speakIfTtsReady(String text) {
+        if (tts != null && isTtsReady) {
+            if (tts.isSpeaking()) {
+                tts.stop();
+            }
+            tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+        }
     }
 }
