@@ -1,8 +1,9 @@
 package com.example.lostfound;
 
 import java.util.Date;
-import java.text.SimpleDateFormat;
-import java.util.Locale;
+// אין צורך ב-SimpleDateFormat ו-Locale כאן, הם לרוב משמשים להצגה חיצונית של תאריכים
+// import java.text.SimpleDateFormat;
+// import java.util.Locale;
 
 /**
  * המחלקה {@code Request} מייצגת דיווח על אבידה במערכת LostFound.
@@ -11,9 +12,14 @@ import java.util.Locale;
  * והערות מערכת.
  * המחלקה כוללת בנאים ליצירת פניות חדשות ולאחזור פניות קיימות ממסד הנתונים,
  * וכן מתודות Getters ו-Setters לגישה ושינוי הנתונים.
+ *
+ * **עדכון עבור Firebase Firestore:**
+ * - נוסף שדה `firestoreId` (String) לאחסון מזהה המסמך הייחודי של Firestore.
+ * - נוסף בנאי ריק (no-argument constructor) הנדרש למיפוי אוטומטי של Firestore.
+ * - השדה `id` (int) נשמר לתאימות לאחור מ-SQLite אך אינו משמש כמזהה הראשי ב-Firestore.
  */
 public class Request {
-    // סטטוס הפנייה - כ-ENUM (חדש)
+    // סטטוס הפנייה - כ-ENUM
     public enum StatusEnum {
         IN_PROGRESS("פנייה בטיפול"),
         FOUND("אבידה נמצאה"),
@@ -31,17 +37,21 @@ public class Request {
         }
 
         public static StatusEnum fromString(String status) {
+            if (status == null) {
+                return IN_PROGRESS; // ברירת מחדל אם הסטטוס ריק
+            }
             for (StatusEnum s : StatusEnum.values()) {
                 if (s.name().equalsIgnoreCase(status) || s.displayName.equals(status)) {
                     return s;
                 }
             }
-            return IN_PROGRESS;
+            return IN_PROGRESS; // ברירת מחדל למקרה שלא נמצאה התאמה
         }
     }
 
     // מאפייני הפנייה - פרטים כלליים ומזהים.
-    private int id; // מזהה ייחודי עבור הפנייה (מוגדר על ידי מסד הנתונים).
+    private int id; // מזהה ייחודי עבור הפנייה (מוגדר על ידי מסד הנתונים SQLite בעבר). לא בשימוש ישיר כמזהה ב-Firestore.
+    private String firestoreId; // NEW: מזהה ייחודי עבור המסמך ב-Firebase Firestore.
     private String username; // שם המשתמש של המדווח.
 
     // מאפייני הפריט שאבד.
@@ -67,7 +77,7 @@ public class Request {
 
     // מאפיינים הקשורים לסטטוס הטיפול בפנייה.
     private String status; // סטטוס הטיפול בפנייה (מתוך תאימות לאחור - ישתנה אוטומטית לפי ה-Enum)
-    private StatusEnum statusEnum; // סטטוס כ-Enum (חדש)
+    private StatusEnum statusEnum; // סטטוס כ-Enum
     private String systemComments; // הערות/תגובה ממנהל המערכת לגבי הטיפול בפנייה.
     private long creationTimestamp; // חותמת זמן של יצירת הפנייה (במילישניות).
 
@@ -83,6 +93,19 @@ public class Request {
      * הודעה זו מוצגת למשתמש מיד לאחר פתיחת פנייה.
      */
     public static final String DEFAULT_NEW_REQUEST_COMMENT = "Thank you for contacting us. Your request has been forwarded to the lost and found department. We will respond to your request within 3 business days.";
+
+    /**
+     * NEW: בנאי ריק (no-argument constructor) הנדרש ל-Firebase Firestore.
+     * משמש כאשר Firestore ממיר מסמך לאובייקט Request.
+     */
+    public Request() {
+        // Initialize default values if needed, or leave blank for Firebase to populate
+        this.id = -1; // Default value for SQLite ID, not used by Firestore as primary ID
+        this.statusEnum = StatusEnum.IN_PROGRESS; // Default status
+        this.status = statusEnum.name();
+        this.systemComments = DEFAULT_NEW_REQUEST_COMMENT; // Default comment
+        this.creationTimestamp = System.currentTimeMillis(); // Default creation time
+    }
 
     /**
      * בנאי ליצירת אובייקט {@code Request} חדש (שעדיין לא נשמר במסד הנתונים).
@@ -110,7 +133,8 @@ public class Request {
                    String itemType, String color, String brand, String ownerName, String lossDescription,
                    Date tripDate, String tripTime, String origin, String destination, String lineNumber,
                    long creationTimestamp) {
-        this.id = -1;
+        this(); // קריאה לבנאי הריק כדי לאתחל ערכי ברירת מחדל.
+        // this.id = -1; // כבר מאותחל בבנאי הריק
         this.username = username;
         this.fullName = fullName;
         this.idCard = idCard;
@@ -127,17 +151,20 @@ public class Request {
         this.origin = origin;
         this.destination = destination;
         this.lineNumber = lineNumber;
-        this.statusEnum = StatusEnum.IN_PROGRESS;
-        this.status = statusEnum.name(); // תאימות לאחור
-        this.systemComments = DEFAULT_NEW_REQUEST_COMMENT;
+        // this.statusEnum = StatusEnum.IN_PROGRESS; // כבר מאותחל בבנאי הריק
+        // this.status = statusEnum.name(); // כבר מאותחל בבנאי הריק
+        // this.systemComments = DEFAULT_NEW_REQUEST_COMMENT; // כבר מאותחל בבנאי הריק
         this.creationTimestamp = creationTimestamp;
-        this.locationAddress = null;
-        this.latitude = null;
-        this.longitude = null;
+        // this.locationAddress = null; // כבר מאותחל בבנאי הריק (או ע"י Firestore)
+        // this.latitude = null; // כבר מאותחל בבנאי הריק (או ע"י Firestore)
+        // this.longitude = null; // כבר מאותחל בבנאי הריק (או ע"י Firestore)
     }
 
     /**
-     * בנאי מלא עם locationAddress, קואורדינטות וסטטוס ENUM (חדש).
+     * בנאי מלא עם locationAddress, קואורדינטות וסטטוס ENUM.
+     * בנאי זה משמש בעיקר כאשר טוענים נתונים מ-Firestore או בונים אובייקט שלם ידנית.
+     * ה-`id` כאן הוא ה-ID מ-SQLite אם עדיין בשימוש, או -1.
+     * ה-`firestoreId` יוגדר בנפרד לאחר הטעינה מ-Firestore, או יעבור כפרמטר אם בונים אובייקט קיים.
      */
     public Request(int id, String username, String fullName, String idCard, String phoneNumber, String email, String city,
                    String itemType, String color, String brand, String ownerName, String lossDescription,
@@ -162,17 +189,18 @@ public class Request {
         this.destination = destination;
         this.lineNumber = lineNumber;
         this.statusEnum = statusEnum;
-        this.status = statusEnum.name(); // תאימות לאחור
+        this.status = statusEnum != null ? statusEnum.name() : null; // ודא סנכרון עם ה-Enum
         this.systemComments = systemComments;
         this.creationTimestamp = creationTimestamp;
         this.locationAddress = locationAddress;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.firestoreId = null; // יש להגדיר אותו לאחר יצירת האובייקט אם נטען מ-Firestore
     }
 
     /**
-     * בנאי ליצירת אובייקט {@code Request} קיים, אשר נשלף ממסד הנתונים.
-     * בנאי זה מקבל את כל הפרטים, כולל ה-ID, הסטטוס, הערות המערכת, כתובת וקואורדינטות.
+     * בנאי ליצירת אובייקט {@code Request} קיים, אשר נשלף ממסד הנתונים (או ממערכת דומה ל-SQLite).
+     * בנאי זה מקבל את כל הפרטים, כולל ה-ID, הסטטוס (כמחרוזת), הערות המערכת, כתובת וקואורדינטות.
      */
     public Request(int id, String username, String fullName, String idCard, String phoneNumber, String email, String city,
                    String itemType, String color, String brand, String ownerName, String lossDescription,
@@ -197,15 +225,17 @@ public class Request {
         this.destination = destination;
         this.lineNumber = lineNumber;
         this.status = status;
-        this.statusEnum = StatusEnum.fromString(status);
+        this.statusEnum = StatusEnum.fromString(status); // המרה ל-Enum
         this.systemComments = systemComments;
         this.creationTimestamp = creationTimestamp;
         this.locationAddress = locationAddress;
         this.latitude = latitude;
         this.longitude = longitude;
+        this.firestoreId = null; // יש להגדיר אותו לאחר יצירת האובייקט אם נטען מ-Firestore
     }
 
     // --- מתודות Getters ו-Setters עבור כל מאפייני המחלקה ---
+    // Firestore משתמש בהן כדי למפות נתונים.
 
     public int getId() {
         return id;
@@ -213,6 +243,15 @@ public class Request {
 
     public void setId(int id) {
         this.id = id;
+    }
+
+    // NEW: Getter ו-Setter עבור firestoreId
+    public String getFirestoreId() {
+        return firestoreId;
+    }
+
+    public void setFirestoreId(String firestoreId) {
+        this.firestoreId = firestoreId;
     }
 
     public String getUsername() {
@@ -345,14 +384,16 @@ public class Request {
 
     /**
      * מחזירה את סטטוס הטיפול בפנייה כמחרוזת (תאימות לאחור).
+     * @return סטטוס הפנייה כמחרוזת.
      */
     public String getStatus() {
-        // תמיד מסונכרן עם ה-Enum
+        // תמיד מסונכרן עם ה-Enum. אם ה-Enum הוא null, זה יחזיר את שדה ה-String הישן.
         return statusEnum != null ? statusEnum.name() : status;
     }
 
     /**
      * מגדירה את סטטוס הטיפול בפנייה (גם ב-Enum וגם במחרוזת).
+     * @param status סטטוס הפנייה כמחרוזת.
      */
     public void setStatus(String status) {
         this.status = status;
@@ -361,6 +402,7 @@ public class Request {
 
     /**
      * מחזירה את סטטוס הטיפול בפנייה כ-Enum.
+     * @return סטטוס הפנייה כ-Enum.
      */
     public StatusEnum getStatusEnum() {
         return statusEnum;
@@ -368,10 +410,11 @@ public class Request {
 
     /**
      * מגדירה את סטטוס הטיפול בפנייה כ-Enum.
+     * @param statusEnum סטטוס הפנייה כ-Enum.
      */
     public void setStatusEnum(StatusEnum statusEnum) {
         this.statusEnum = statusEnum;
-        this.status = statusEnum.name();
+        this.status = statusEnum != null ? statusEnum.name() : null; // ודא סנכרון עם שדה הסטרינג
     }
 
     public String getSystemComments() {
@@ -390,7 +433,6 @@ public class Request {
         this.creationTimestamp = creationTimestamp;
     }
 
-    // שדה חדש: כתובת מחלקת האבידות
     public String getLocationAddress() {
         return locationAddress;
     }
@@ -399,7 +441,6 @@ public class Request {
         this.locationAddress = locationAddress;
     }
 
-    // שדות חדשים: קואורדינטות
     public Double getLatitude() {
         return latitude;
     }
@@ -421,12 +462,14 @@ public class Request {
      * היא מחזירה ייצוג מחרוזתי של אובייקט {@code Request},
      * המשמש בדרך כלל להצגה ברכיבי ממשק משתמש כמו {@code ListView}
      * (לדוגמה, על ידי {@code ArrayAdapter}).
+     * כעת כוללת גם את ה-Firestore ID.
      *
      * @return מחרוזת המכילה את ID הפנייה וסוג הפריט.
      */
     @Override
     public String toString() {
-        // מעצב את הפלט כך שיציג את ID הפנייה וסוג הפריט.
-        return "Case ID: " + id + " | Item Type: " + itemType;
+        // מעצב את הפלט כך שיציג את ID הפנייה (עדיפות ל-Firestore ID) וסוג הפריט.
+        String idToDisplay = (firestoreId != null && !firestoreId.isEmpty()) ? firestoreId : String.valueOf(id);
+        return "Case ID: " + idToDisplay + " | Item Type: " + itemType;
     }
 }

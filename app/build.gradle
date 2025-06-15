@@ -1,5 +1,6 @@
 plugins {
     alias(libs.plugins.android.application)
+    id 'com.google.gms.google-services' // NEW: הוסף את פלאגין Google Services כאן
 }
 
 android {
@@ -41,15 +42,28 @@ dependencies {
     androidTestImplementation libs.ext.junit
     androidTestImplementation libs.espresso.core
 
+    // חדש: תלויות Firebase
+    // מומלץ להשתמש ב-Firebase BoM כדי לנהל את גרסאות ספריות Firebase ולדאוג לתאימות ביניהן.
+    // בדוק את הגרסה העדכנית ביותר של ה-BoM ב- https://firebase.google.com/docs/android/setup#available-libraries
+    implementation(platform("com.google.firebase:firebase-bom:33.1.0")) // עדכני ליוני 2025
+
+    // הוסף את התלות עבור Cloud Firestore
+    // כשאתה משתמש ב-BoM, אין צורך לציין גרסאות ספציפיות כאן.
+    implementation("com.google.firebase:firebase-firestore")
+
+    // אם תצטרך בעתיד אימות משתמשים (Auth), הוסף גם:
+    // implementation("com.google.firebase:firebase-auth")
+
+
     // חדש: תלות ב-Google Maps SDK
     // ודא שאתה משתמש בגרסה העדכנית ביותר. ניתן למצוא את הגרסה העדכנית כאן:
-    // https://developers.google.com/maps/documentation/android-sdk/start#add_the_sdk_as_a_dependency
-    implementation 'com.google.android.gms:play-services-maps:18.2.0' // גרסה עדכנית נפוצה
+    // https://developers.google.com/maps/documentation/android-sdk/library-versions
+    implementation 'com.google.android.gms:play-services-maps:18.2.0' // גרסה עדכנית נפוצה (לא BoM)
 
     // חדש: תלות ב-Google Places SDK (לגיאו-קידוד - המרת כתובות לקואורדינטות ולהיפך)
     // ודא שאתה משתמש בגרסה העדכנית ביותר.
-    // https://developers.google.com/maps/documentation/places/android-sdk/start#add_the_sdk_as_a_dependency
-    implementation 'com.google.android.libraries.places:places:3.4.0' // גרסה עדכנית נפוצה
+    // https://developers.google.com/maps/documentation/places/android-sdk/client-migration
+    implementation 'com.google.android.libraries.places:places:3.4.0' // גרסה עדכנית נפוצה (לא BoM)
 
     // חדש: תלויות עבור Coroutines ו-Lifecycle (לטיפול במשימות אסינכרוניות כמו Geocoding)
     // גרסאות עדכניות:
@@ -57,4 +71,5 @@ dependencies {
     // https://github.com/Kotlin/kotlinx.coroutines
     implementation 'androidx.lifecycle:lifecycle-runtime-ktx:2.8.0' // גרסה עדכנית נפוצה
     implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3' // גרסה עדכנית נפוצה
+    implementation 'com.google.firebase:firebase-messaging:23.x.x'
 }

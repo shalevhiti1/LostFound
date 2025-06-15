@@ -1,4 +1,4 @@
-package com.example.lostfound;
+package com.example.lostfound; // מגדיר את חבילת הקוד של האפליקציה.
 
 import android.content.Context;
 import android.view.LayoutInflater;
@@ -11,11 +11,13 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 
 import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
 /**
  * מתאם להצגת רשימת פניות (Request) בליסט-ויו.
+ * קודכן להצגת ה-Firestore ID של הפנייה.
  */
 public class RequestAdapter extends ArrayAdapter<Request> {
 
@@ -42,7 +44,7 @@ public class RequestAdapter extends ArrayAdapter<Request> {
         View listItem = convertView;
         if (listItem == null) {
             listItem = LayoutInflater.from(context).inflate(
-                    R.layout.list_item_request,
+                    R.layout.list_item_request, // ודא שקובץ ה-layout הזה קיים
                     parent,
                     false
             );
@@ -55,8 +57,9 @@ public class RequestAdapter extends ArrayAdapter<Request> {
         TextView statusTextView = listItem.findViewById(R.id.listItemStatus);
         TextView tripDateTextView = listItem.findViewById(R.id.listItemTripDate);
 
+        // שינוי עיקרי: הצג את ה-Firestore ID במקום ה-ID המספרי הישן.
         if (caseIdTextView != null) {
-            caseIdTextView.setText("Case ID: " + currentRequest.getId());
+            caseIdTextView.setText("Case ID: " + currentRequest.getFirestoreId());
         }
         if (itemTypeTextView != null) {
             itemTypeTextView.setText("Item Type: " + currentRequest.getItemType());
@@ -65,8 +68,9 @@ public class RequestAdapter extends ArrayAdapter<Request> {
             statusTextView.setText("Status: " + currentRequest.getStatus());
         }
         if (tripDateTextView != null) {
+            // ה-tripDate ב-Request כעת הוא long (timestamp), לכן יש ליצור אובייקט Date ממנו.
             SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
-            tripDateTextView.setText("Trip Date: " + dateFormat.format(currentRequest.getTripDate()));
+            tripDateTextView.setText("Trip Date: " + dateFormat.format(new Date(String.valueOf(currentRequest.getTripDate()))));
         }
 
         return listItem;

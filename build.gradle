@@ -1,4 +1,19 @@
 // Top-level build file where you can add configuration options common to all sub-projects/modules.
+
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        classpath 'com.android.tools.build:gradle:8.2.0' // ודא שזו הגרסה הנכונה של Android Gradle Plugin
+        classpath 'com.google.gms:google-services:4.4.1' // NEW: זה כבר קיים אצלך, וזה נכון עבור Firebase!
+    }
+}
+
 plugins {
-alias(libs.plugins.android.application) apply false
+    alias(libs.plugins.android.application) apply false
+    // NEW: אם אתה משתמש ב-libs.versions.toml עבור Google Services, הוסף אותו כאן
+    // לדוגמה: alias(libs.plugins.google.services) apply false
+    // אם לא, השאר כמו שהיה - ה-classpath ב-buildscript כבר מטפל בזה.
 }

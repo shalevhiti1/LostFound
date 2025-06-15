@@ -6,26 +6,33 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
+import android.speech.tts.TextToSpeech;
+import android.util.Log; // Added for logging
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import com.google.android.gms.tasks.Task; // Added for Firebase Tasks
+import com.google.android.gms.tasks.Tasks; // Added for Firebase Tasks (e.g., Tasks.whenAllSuccess)
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import android.speech.tts.TextToSpeech; // ייבוא TextToSpeech
-
-import java.util.Locale; // ייבוא Locale ל-TTS
-
 /**
  * מסך עריכת פרטי משתמש: מאפשר עדכון שם, טלפון, אימייל ועיר.
+ * קודכן לעבודה עם Firebase Firestore.
  */
 public class EditProfileActivity extends AppCompatActivity {
+
+    private static final String TAG = "EditProfileActivity"; // Added TAG for logging
 
     private EditText editUsername, editFullName, editIdCard, editPhoneNumber, editEmail, editCity;
     private Button saveProfileButton;
     private DatabaseHelper dbHelper;
     private String currentUsername;
-    private ExecutorService executorService;
+    private ExecutorService executorService; // Kept for general background tasks if needed, Firebase Tasks handle their own threading.
 
     // משתני TTS
     private TextToSpeech tts;
@@ -39,31 +46,35 @@ public class EditProfileActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_edit_profile);
 
-        dbHelper = new DatabaseHelper(this);
-        executorService = Executors.newSingleThreadExecutor();
+        dbHelper = new DatabaseHelper(this); // Initialize DatabaseHelper with Context
+        executorService = Executors.newSingleThreadExecutor(); // Initialize ExecutorService
 
         // אתחול TTS
-        tts = new TextToSpeech(this, new TextToSpeech.OnInitListener() {
-            @Override
-            public void onInit(int status) {
-                if (status == TextToSpeech.SUCCESS) {
-                    int result = tts.setLanguage(Locale.US);
-                    isTtsReady = result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED;
-                } else {
-                    isTtsReady = false;
+        tts = new TextToSpeech(this, status -> {
+            if (status == TextToSpeech.SUCCESS) {
+                int result = tts.setLanguage(Locale.US); // Consider changing to Locale("iw") for Hebrew
+                isTtsReady = result != TextToSpeech.LANG_MISSING_DATA && result != TextToSpeech.LANG_NOT_SUPPORTED;
+                if (!isTtsReady) {
+                    Log.e(TAG, "TTS language not supported or missing data.");
                 }
+            } else {
+                isTtsReady = false;
+                Log.e(TAG, "TTS initialization failed.");
             }
         });
 
+        // Get current username from Intent
         currentUsername = getIntent().getStringExtra("username");
         if (currentUsername == null || currentUsername.isEmpty()) {
-            String errorMsg = "error: username not found.";
+            String errorMsg = "Error: Username not found.";
             Toast.makeText(this, errorMsg, Toast.LENGTH_SHORT).show();
             speakIfTtsReady(errorMsg);
+            Log.e(TAG, errorMsg);
             finish();
             return;
         }
 
+        // Initialize UI components
         editUsername = findViewById(R.id.editUsername);
         editFullName = findViewById(R.id.editFullName);
         editIdCard = findViewById(R.id.editIdCard);
@@ -72,8 +83,10 @@ public class EditProfileActivity extends AppCompatActivity {
         editCity = findViewById(R.id.editCity);
         saveProfileButton = findViewById(R.id.saveProfileButton);
 
+        // Load user details from Firebase
         loadUserDetails();
 
+        // Set OnClickListener for save button
         saveProfileButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -85,8 +98,11 @@ public class EditProfileActivity extends AppCompatActivity {
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        executorService.shutdown();
-        // כיבוי TTS
+        // Shut down the executor service
+        if (executorService != null && !executorService.isShutdown()) {
+            executorService.shutdown();
+        }
+        // Shut down TextToSpeech
         if (tts != null) {
             tts.stop();
             tts.shutdown();
@@ -94,29 +110,55 @@ public class EditProfileActivity extends AppCompatActivity {
     }
 
     /**
-     * טוען את פרטי המשתמש ומציג אותם בשדות.
+     * טוען את פרטי המשתמש מ-Firebase Firestore ומציג אותם בשדות.
+     * פעולה זו היא אסינכרונית.
      */
     private void loadUserDetails() {
-        executorService.execute(() -> {
-            final String fullName = dbHelper.getUserFullName(currentUsername);
-            final String idCard = dbHelper.getUserIdCard(currentUsername);
-            final String phoneNumber = dbHelper.getUserPhoneNumber(currentUsername);
-            final String email = dbHelper.getUserEmail(currentUsername);
-            final String city = dbHelper.getUserCity(currentUsername);
+        Log.d(TAG, "Loading user details for: " + currentUsername);
 
-            runOnUiThread(() -> {
-                editUsername.setText(currentUsername);
-                editFullName.setText(fullName);
-                editIdCard.setText(idCard);
-                editPhoneNumber.setText(phoneNumber);
-                editEmail.setText(email);
-                editCity.setText(city);
-            });
-        });
+        // Create a list of Tasks to fetch all user details concurrently
+        List<Task<String>> fetchTasks = new ArrayList<>();
+        fetchTasks.add(dbHelper.getUserFullName(currentUsername));
+        fetchTasks.add(dbHelper.getUserIdCard(currentUsername));
+        fetchTasks.add(dbHelper.getUserPhoneNumber(currentUsername));
+        fetchTasks.add(dbHelper.getUserEmail(currentUsername));
+        fetchTasks.add(dbHelper.getUserCity(currentUsername));
+
+        // Use Tasks.whenAllSuccess to wait for all fetch operations to complete
+        Tasks.whenAllSuccess(fetchTasks)
+                .addOnSuccessListener(results -> {
+                    // results will contain the String values in the order they were added to fetchTasks
+                    String fullName = (String) results.get(0);
+                    String idCard = (String) results.get(1);
+                    String phoneNumber = (String) results.get(2);
+                    String email = (String) results.get(3);
+                    String city = (String) results.get(4);
+
+                    // Update UI on the main thread
+                    runOnUiThread(() -> {
+                        editUsername.setText(currentUsername); // Username is typically not editable
+                        editFullName.setText(fullName != null ? fullName : "");
+                        editIdCard.setText(idCard != null ? idCard : "");
+                        editPhoneNumber.setText(phoneNumber != null ? phoneNumber : "");
+                        editEmail.setText(email != null ? email : "");
+                        editCity.setText(city != null ? city : "");
+                        Log.d(TAG, "User details loaded successfully for: " + currentUsername);
+                    });
+                })
+                .addOnFailureListener(e -> {
+                    // Handle error if any of the fetch operations fail
+                    runOnUiThread(() -> {
+                        String toastMsg = "Failed to load user details: " + e.getMessage();
+                        Toast.makeText(EditProfileActivity.this, toastMsg, Toast.LENGTH_LONG).show();
+                        speakIfTtsReady(toastMsg);
+                        Log.e(TAG, "Error loading user details for " + currentUsername, e);
+                    });
+                });
     }
 
     /**
-     * שומר את השינויים על המשתמש במסד הנתונים.
+     * שומר את השינויים על המשתמש ב-Firebase Firestore.
+     * פעולה זו היא אסינכרונית.
      */
     private void saveUserDetails() {
         String fullName = editFullName.getText().toString().trim();
@@ -125,9 +167,10 @@ public class EditProfileActivity extends AppCompatActivity {
         String email = editEmail.getText().toString().trim();
         String city = editCity.getText().toString().trim();
 
+        // Input validation
         if (TextUtils.isEmpty(fullName) || TextUtils.isEmpty(idCard) ||
                 TextUtils.isEmpty(phoneNumber) || TextUtils.isEmpty(email) || TextUtils.isEmpty(city)) {
-            String toastMsg = "please fill all fields.";
+            String toastMsg = "Please fill all fields.";
             Toast.makeText(this, toastMsg, Toast.LENGTH_SHORT).show();
             speakIfTtsReady(toastMsg);
             return;
@@ -140,26 +183,41 @@ public class EditProfileActivity extends AppCompatActivity {
             return;
         }
 
-        executorService.execute(() -> {
-            boolean isUpdated = dbHelper.updateUserDetails(currentUsername, fullName, idCard, phoneNumber, email, city);
-
-            runOnUiThread(() -> {
-                if (isUpdated) {
-                    String toastMsg = "saves successfully!";
-                    Toast.makeText(EditProfileActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
-                    speakIfTtsReady(toastMsg);
-                    finish();
-                } else {
-                    String toastMsg = "שמירת הפרטים נכשלה. נסה שוב.";
-                    Toast.makeText(EditProfileActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
-                    speakIfTtsReady(toastMsg);
-                }
-            });
-        });
+        Log.d(TAG, "Saving user details for: " + currentUsername);
+        // Call the asynchronous update method from DatabaseHelper
+        dbHelper.updateUserDetails(currentUsername, fullName, idCard, phoneNumber, email, city)
+                .addOnSuccessListener(isSuccess -> {
+                    // This isSuccess will be true if the Firestore operation completed successfully.
+                    if (isSuccess) {
+                        runOnUiThread(() -> {
+                            String toastMsg = "Saved successfully!";
+                            Toast.makeText(EditProfileActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
+                            speakIfTtsReady(toastMsg);
+                            finish(); // Close activity on success
+                        });
+                    } else {
+                        runOnUiThread(() -> {
+                            String toastMsg = "Saving details failed. Please try again."; // Changed Hebrew message
+                            Toast.makeText(EditProfileActivity.this, toastMsg, Toast.LENGTH_SHORT).show();
+                            speakIfTtsReady(toastMsg);
+                            Log.e(TAG, "Firestore update operation reported as not successful for user: " + currentUsername);
+                        });
+                    }
+                })
+                .addOnFailureListener(e -> {
+                    // Handle any exceptions during the Firestore update process
+                    runOnUiThread(() -> {
+                        String toastMsg = "Saving details failed: " + e.getMessage();
+                        Toast.makeText(EditProfileActivity.this, toastMsg, Toast.LENGTH_LONG).show();
+                        speakIfTtsReady(toastMsg);
+                        Log.e(TAG, "Error saving user details for " + currentUsername, e);
+                    });
+                });
     }
 
     /**
      * משמיע הודעה קולית אם TTS מוכן.
+     * @param text ההודעה להשמעה.
      */
     private void speakIfTtsReady(String text) {
         if (tts != null && isTtsReady) {
@@ -167,6 +225,8 @@ public class EditProfileActivity extends AppCompatActivity {
                 tts.stop();
             }
             tts.speak(text, TextToSpeech.QUEUE_FLUSH, null, null);
+        } else {
+            Log.w(TAG, "TTS not ready or initialized, cannot speak: " + text);
         }
     }
 }

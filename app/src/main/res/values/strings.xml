@@ -26,7 +26,7 @@
     <string name="status_found">Found</string>
     <string name="status_not_found">Not Found</string>
     <string name="status_rejected">Rejected</string>
-
+    <string name="default_notification_channel_id" translatable="false">lost_found_channel</string>
     <!-- Spinner Statuses (for AdminEditCaseActivity and filters) -->
     <string-array name="case_statuses">
         <item>@string/status_in_progress</item>
